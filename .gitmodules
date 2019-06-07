@@ -1,3 +1,3 @@
 [submodule "support"]
 	path = support
-	url = git@bitbucket.org:ccicconetti/support.git
+	url = git@github.com:ccicconetti/support.git
