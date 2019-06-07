@@ -43,9 +43,9 @@ The unit tests will not be compiled (gmock will not be even downloaded).
 
 At least two ways:
 
-1. [recommended] Include the full git source tree in your project as a submodule (e.g., under `rest`), add a `add_subdirectory(rest/Rest)` directive to your `CMakeLists.txt` file, fix the header inclusion path so that is also searches in there, and finally in all your targets that use the library add `uiiitrest`.
+1. [recommended] Include the full git source tree in your project as a submodule (e.g., under `rest`), add `add_subdirectory(rest/Rest)` and `add_subdirectory(rest/support/Support)` directives to your `CMakeLists.txt` file, fix the header inclusion path so that is also searches in there, and finally in all your targets that use the library add `uiiitrest` and `uiiitsupport`.
 
-2. Copy the header files in your header inclusion path, copy the compiled libraries in your library inclusion path.
+2. Copy the header files in your header inclusion path, copy the compiled libraries in your library inclusion path. This applies to both uiiitrest and uiiitsupport (included as a sub-module).
 
 Method 1 is preferrable because: the dependency stays together with your code; if improvements/fixes are made to the library you just have to update the submodule.
 
