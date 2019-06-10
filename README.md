@@ -15,7 +15,7 @@ Make sure you are installing the development version of the packages, which also
 Note that [gmock](https://github.com/google/googlemock) is also needed to compile the unit tests but, if everything goes right, it will be downloaded automatically by CMake (needless to say: you do need a working Internet connection for this step).
 
 ```
-git clone git@github.com:ccicconetti/support.git
+git clone git@github.com:ccicconetti/rest.git
 git submodule update --init --recursive
 ```
 
