@@ -23,6 +23,7 @@ Once everything is ready (assuming `clang++` is your compiler):
 ```
 cd build/debug
 ../build.sh clang++
+make
 ```
 
 This will compile the full build tree consisting of:
@@ -35,6 +36,7 @@ If you want to compile with compiler optimisations and no assertions:
 ```
 cd build/release
 ../build.sh clang++
+make
 ```
 
 The unit tests will not be compiled (gmock will not be even downloaded).
