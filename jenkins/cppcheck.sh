@@ -16,6 +16,6 @@ OPTIONS="--library=gnu --library=posix \
 #-I../build/debug/googletest-src/googletest/include \
 
 ${CPPCHECK} ${OPTIONS} \
-  ../Support \
+  ../Rest \
   ../Test \
   2>report.xml
