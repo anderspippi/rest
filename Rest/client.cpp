@@ -31,46 +31,74 @@ SOFTWARE.
 
 #include <glog/logging.h>
 
+#include <cassert>
+
 namespace uiiit {
 namespace rest {
 
-Client::Client(const std::string& aUri)
-    : theClient(aUri) {
+Client::Client(const std::string& aUri, const bool aInsecure)
+    : theConfig()
+    , theClient(nullptr)
+    , theUriBuilder()
+    , theHeaders() {
+  theConfig.set_validate_certificates(not aInsecure);
+  theClient = std::make_unique<web::http::client::http_client>(aUri, theConfig);
+  // changeHeader("Host",
+  //              theClient->base_uri().host() + ":" +
+  //                  std::to_string(theClient->base_uri().port()));
 }
 
 Client::~Client() {
+  assert(theClient != nullptr);
+}
+
+void Client::changeHeader(const std::string& aName, const std::string& aValue) {
+  theHeaders[aName] = aValue;
 }
 
 std::pair<web::http::status_code, web::json::value>
-Client::get(const std::string& aPathQuery) {
+Client::get(const std::string& aPath, const std::string& aQuery) {
   return request(
-      web::http::methods::GET, aPathQuery, web::json::value::object());
+      web::http::methods::GET, aPath, aQuery, web::json::value::object());
 }
 
 std::pair<web::http::status_code, web::json::value>
-Client::post(const web::json::value& aBody, const std::string& aPathQuery) {
-  return request(web::http::methods::POST, aPathQuery, aBody);
+Client::post(const web::json::value& aBody,
+             const std::string&      aPath,
+             const std::string&      aQuery) {
+  return request(web::http::methods::POST, aPath, aQuery, aBody);
 }
 
 std::pair<web::http::status_code, web::json::value>
-Client::put(const web::json::value& aBody, const std::string& aPathQuery) {
-  return request(web::http::methods::PUT, aPathQuery, aBody);
+Client::put(const web::json::value& aBody,
+            const std::string&      aPath,
+            const std::string&      aQuery) {
+  return request(web::http::methods::PUT, aPath, aQuery, aBody);
 }
 
 std::pair<web::http::status_code, web::json::value>
-Client::patch(const web::json::value& aBody, const std::string& aPathQuery) {
-  return request(web::http::methods::PATCH, aPathQuery, aBody);
+Client::patch(const web::json::value& aBody,
+              const std::string&      aPath,
+              const std::string&      aQuery) {
+  return request(web::http::methods::PATCH, aPath, aQuery, aBody);
 }
 
-web::http::status_code Client::del(const std::string& aPathQuery) {
-  return request(web::http::methods::DEL, aPathQuery);
+web::http::status_code Client::del(const std::string& aPath,
+                                   const std::string& aQuery) {
+  return request(web::http::methods::DEL, aPath, aQuery);
 }
 
 web::http::status_code Client::request(const web::http::method aMethod,
-                                       const std::string&      aPathQuery) {
+                                       const std::string&      aPath,
+                                       const std::string&      aQuery) {
   web::http::status_code ret;
 
-  theClient.request(aMethod, aPathQuery)
+  // create the HTTP request
+  auto myRequest = createRequest(aMethod, aPath, aQuery);
+  VLOG(2) << "sending HTTP request to " << theUriBuilder.to_string();
+
+  // send the request and wait for the response
+  theClient->request(myRequest)
       .then(
           [&ret](web::http::http_response aResp) { ret = aResp.status_code(); })
       .wait();
@@ -80,12 +108,20 @@ web::http::status_code Client::request(const web::http::method aMethod,
 
 std::pair<web::http::status_code, web::json::value>
 Client::request(const web::http::method aMethod,
-                const std::string&      aPathQuery,
+                const std::string&      aPath,
+                const std::string&      aQuery,
                 const web::json::value& aBody) {
   std::pair<web::http::status_code, web::json::value> ret;
 
-  theClient.request(aMethod, aPathQuery, aBody)
+  // create the HTTP request
+  auto myRequest = createRequest(aMethod, aPath, aQuery);
+  myRequest.set_body(aBody);
+  VLOG(2) << "sending HTTP request:\n" << myRequest.to_string();
+
+  // send the request and wait for the response
+  theClient->request(myRequest)
       .then([&ret](web::http::http_response aResp) {
+        VLOG(2) << "received:\n" << aResp.to_string();
         ret.first = aResp.status_code();
         return aResp.extract_json();
       })
@@ -100,6 +136,19 @@ Client::request(const web::http::method aMethod,
       .wait();
 
   return ret;
+}
+
+web::http::http_request Client::createRequest(const web::http::method aMethod,
+                                              const std::string&      aPath,
+                                              const std::string&      aQuery) {
+  web::http::http_request myRequest(aMethod);
+  theUriBuilder.set_path(aPath);
+  theUriBuilder.set_query(aQuery);
+  myRequest.set_request_uri(theUriBuilder.to_uri());
+  for (const auto& elem : theHeaders) {
+    myRequest.headers()[elem.first] = elem.second;
+  }
+  return myRequest;
 }
 
 } // namespace rest

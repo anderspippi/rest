@@ -31,47 +31,78 @@ SOFTWARE.
 
 #include <cpprest/http_client.h>
 #include <cpprest/json.h>
+#include <cpprest/uri_builder.h>
 
+#include <map>
+#include <memory>
 #include <string>
 #include <utility>
 
 namespace uiiit {
 namespace rest {
 
+/**
+ * Basic HTTP client.
+ *
+ * Calls to the methods of this class are not thread-safe.
+ */
 class Client
 {
  public:
-  explicit Client(const std::string& aUri);
+  /**
+   * Create an HTTP client.
+   *
+   * \param aUri the base URI to call methods.
+   *
+   * \param aInsecure if false accept also invalid SSL certificates.
+   */
+  explicit Client(const std::string& aUri, const bool aInsecure = false);
   virtual ~Client();
 
+  //! Add/modify a given header to future requests.
+  void changeHeader(const std::string& aName, const std::string& aValue);
+
   std::pair<web::http::status_code, web::json::value>
-  get(const std::string& aPathQuery = std::string());
+  get(const std::string& aPath = std::string(), const std::string& aQuery = std::string());
 
   std::pair<web::http::status_code, web::json::value>
   post(const web::json::value& aBody,
-       const std::string&      aPathQuery = std::string());
+       const std::string&      aPath = std::string(),
+       const std::string&      aQuery = std::string());
 
   std::pair<web::http::status_code, web::json::value>
   put(const web::json::value& aBody,
-      const std::string&      aPathQuery = std::string());
+      const std::string&      aPath = std::string(),
+      const std::string&      aQuery = std::string());
 
   std::pair<web::http::status_code, web::json::value>
   patch(const web::json::value& aBody,
-        const std::string&      aPathQuery = std::string());
+        const std::string&      aPath = std::string(),
+        const std::string&      aQuery = std::string());
 
-  web::http::status_code del(const std::string& aPathQuery = std::string());
+  web::http::status_code del(const std::string& aPath = std::string(),
+                             const std::string& aQuery = std::string());
 
  private:
   std::pair<web::http::status_code, web::json::value>
   request(const web::http::method aMethod,
-          const std::string&      aPathQuery,
+          const std::string&      aPath,
+          const std::string&      aQuery,
           const web::json::value& aBody);
 
   web::http::status_code request(const web::http::method aMethod,
-                                 const std::string&      aPathQuery);
+                                 const std::string&      aPath,
+                                 const std::string&      aQuery);
+
+  web::http::http_request createRequest(const web::http::method aMethod,
+                                        const std::string&      aPath,
+                                        const std::string&      aQuery);
 
  private:
-  web::http::client::http_client theClient;
+  web::http::client::http_client_config           theConfig;
+  std::unique_ptr<web::http::client::http_client> theClient;
+  web::uri_builder                                theUriBuilder;
+  std::map<std::string, std::string>              theHeaders;
 };
 
 } // namespace rest
