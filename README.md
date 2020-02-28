@@ -30,7 +30,7 @@ make
 This will compile the full build tree consisting of:
 
 1. `Rest`: library with simple wrappers of cpprest
-2. `Test`: unit tests, which you can execute with `Test/testmain`
+2. `Test`: unit tests, which you can execute with `Test/testrest`
 
 If you want to compile with compiler optimisations and no assertions:
 
