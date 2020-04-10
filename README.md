@@ -16,6 +16,7 @@ Note that [gmock](https://github.com/google/googlemock) is also needed to compil
 
 ```
 git clone git@github.com:ccicconetti/rest.git
+cd rest
 git submodule update --init --recursive
 ```
 
