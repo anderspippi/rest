@@ -29,21 +29,15 @@ endif()
 
 include_directories(${CMAKE_BINARY_DIR}/googletest-src/googletest/include)
 
-add_library(testrestlib SHARED
-  ${CMAKE_CURRENT_SOURCE_DIR}/testrest.cpp
-)
+include(GoogleTest)
 
-target_link_libraries(testrestlib
+set(LIBS
   uiiitrest
   uiiitsupport
   gtest
   ${Boost_LIBRARIES}
 )
 
-add_executable(testrest
-  ${CMAKE_CURRENT_SOURCE_DIR}/testmain.cpp
-)
-
-target_link_libraries(testrest
-  testrestlib
-)
+add_executable(testrest testmain.cpp testrest.cpp)
+target_link_libraries(testrest ${LIBS})
+gtest_discover_tests(testrest)

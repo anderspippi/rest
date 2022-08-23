@@ -1,4 +1,4 @@
-add_library(uiiitrest SHARED
+add_library(uiiitrest STATIC
   ${CMAKE_CURRENT_SOURCE_DIR}/client.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/datatype.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/problemdetails.cpp
